@@ -64,7 +64,7 @@ public class BaseAccessibilityService extends AccessibilityService {
     public void goAccess() {
         Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        mContext.startActivity(intent);
+        this.startActivity(intent);
     }
 
     /**

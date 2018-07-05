@@ -22,13 +22,14 @@ import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
-
+import android.os.Handler;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.HashSet;
+
 
 
 public class HiAccessibilityService extends BaseAccessibilityService {
@@ -38,6 +39,16 @@ public class HiAccessibilityService extends BaseAccessibilityService {
 
     private long lastTop = -1;
 
+    private long lastEvent = 0;
+
+    @Override
+    public void onInterrupt() {
+        super.onInterrupt();
+
+        Log.e("xxx", "onInterrupt ");
+        goAccess();
+    }
+
     @Override
     public void onAccessibilityEvent(final AccessibilityEvent event) {
 
@@ -46,7 +57,9 @@ public class HiAccessibilityService extends BaseAccessibilityService {
 
         Log.e("xxx", "eventType " + eventType);
 
+        lastEvent = System.currentTimeMillis();
 
+        checkEvent();
 
         switch (eventType) {
 
@@ -62,12 +75,16 @@ public class HiAccessibilityService extends BaseAccessibilityService {
                     if(root != null) {
                         chatWindowCode = root.hashCode();
                     }
+
+                    scrollChatView(root);
+
                 }else if(className.indexOf("hi.ui.MainActivity") != -1){
                     lastTop = -3;
                     isChatWindow = false;
                     chatWindowCode = 0;
                 }else if(className.indexOf("LuckyMoneyActivity") != -1){
                     getLuckMoney();
+                    delayBackToChat();
                 }
 
                 AccessibilityNodeInfo root = getRootInActiveWindow();
@@ -97,17 +114,20 @@ public class HiAccessibilityService extends BaseAccessibilityService {
         }
     }
 
+    private void scrollChatView(AccessibilityNodeInfo root){
+        AccessibilityNodeInfo listView = getNodeByClassname(root, "ListView");
+
+        if(listView != null) {
+            Log.e("xxx", "scrollChatView");
+            listView.performAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
+        }
+    }
+
     private boolean findLuckMoney(){
         AccessibilityNodeInfo root = getRootInActiveWindow();
 
-//        if(root != null){
-//            Log.e("xxx", "findLuckMoney root.hashCode()  " + root.hashCode());
-//            Log.e("xxx", "findLuckMoney chatWindowCode  " + chatWindowCode);
-//        }
-
         if(root != null) {
             List<AccessibilityNodeInfo> infos = root.findAccessibilityNodeInfosByText("领取红包");
-//            Log.e("xxx", "findLuckMoney infos " + infos);
 
             if (infos != null && infos.size() > 0) {
 
@@ -183,6 +203,50 @@ public class HiAccessibilityService extends BaseAccessibilityService {
                 Log.e("xxx", "backToChat2 click");
             }
         }
+    }
+
+
+    private void checkEvent(){
+        handler.postDelayed(new Runnable() {
+
+            @Override
+            public void run() {
+                long now = System.currentTimeMillis();
+                Log.e("xxx", "checkEvent");
+
+                if(now - lastEvent > 5000){
+                    Log.e("xxx", "checkEvent delay");
+                    lastEvent = now;
+//                    goAccess();
+                    performGlobalAction(GLOBAL_ACTION_RECENTS);
+                    delayMenu();
+                }
+            }
+        }, 10000);
+    }
+
+    private void delayBackToChat(){
+        handler.postDelayed(new Runnable() {
+
+            @Override
+            public void run() {
+                Log.e("xxx", "delay click");
+
+                backToChat();
+            }
+        }, 5000);
+    }
+
+    private void delayMenu(){
+        handler.postDelayed(new Runnable() {
+
+            @Override
+            public void run() {
+                Log.e("xxx", "delay recents");
+
+                performGlobalAction(GLOBAL_ACTION_RECENTS);
+            }
+        }, 1000);
     }
 
     private AccessibilityNodeInfo getNodeByClassname(AccessibilityNodeInfo info, String classname){
