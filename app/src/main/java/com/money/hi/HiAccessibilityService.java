@@ -30,9 +30,23 @@ import java.util.Arrays;
 import java.util.Set;
 import java.util.HashSet;
 
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.WindowManager;
+import android.widget.ImageButton;
+import android.widget.RelativeLayout;
+import android.widget.Toast;
+import android.widget.LinearLayout;
 
+import android.graphics.PixelFormat;
+
+import android.os.SystemClock;
 
 public class HiAccessibilityService extends BaseAccessibilityService {
+
+    private static final String TAG = "xxx";
 
     private boolean isChatWindow = false;
     private long chatWindowCode = 0;
@@ -40,6 +54,14 @@ public class HiAccessibilityService extends BaseAccessibilityService {
     private long lastTop = -1;
 
     private long lastEvent = 0;
+
+    private boolean isWork = false;
+
+    @Override
+    public void onCreate() {
+        createToucher();
+    }
+
 
     @Override
     public void onInterrupt() {
@@ -70,6 +92,11 @@ public class HiAccessibilityService extends BaseAccessibilityService {
                 if(className.indexOf("activities.Chat") != -1){
                     isChatWindow = true;
 
+                    if(imageButton1 != null){
+                        isWork = true;
+                        imageButton1.setBackgroundResource(R.drawable.green);
+                    }
+
                     AccessibilityNodeInfo root = getRootInActiveWindow();
 
                     if(root != null) {
@@ -82,14 +109,20 @@ public class HiAccessibilityService extends BaseAccessibilityService {
                     lastTop = -3;
                     isChatWindow = false;
                     chatWindowCode = 0;
+
+                    if(imageButton1 != null){
+                        isWork = false;
+                        imageButton1.setBackgroundResource(R.drawable.red);
+                    }
+
                 }else if(className.indexOf("LuckyMoneyActivity") != -1){
                     getLuckMoney();
                     delayBackToChat();
                 }
 
-                AccessibilityNodeInfo root = getRootInActiveWindow();
-
-                HiAccessibilityService.printPacketInfo(root);
+//                AccessibilityNodeInfo root = getRootInActiveWindow();
+//
+//                HiAccessibilityService.printPacketInfo(root);
 
                 break;
 
@@ -179,7 +212,7 @@ public class HiAccessibilityService extends BaseAccessibilityService {
                 AccessibilityNodeInfo btn = getNodeByClassname(root, "ImageButton");
 
 //                List<AccessibilityNodeInfo> btns = root.findAccessibilityNodeInfosByText("百度红包");
-                Log.e("xxx", "backToChat btns " + btn);
+//                Log.e("xxx", "backToChat btns " + btn);
 //
                 if(btn != null){
                     performViewClick(btn);
@@ -196,7 +229,7 @@ public class HiAccessibilityService extends BaseAccessibilityService {
         AccessibilityNodeInfo root = getRootInActiveWindow();
         if(root != null) {
             List<AccessibilityNodeInfo> infos = root.findAccessibilityNodeInfosByText("手慢了，红包派完了");
-            Log.e("xxx", "backToChat2 infos " + infos);
+//            Log.e("xxx", "backToChat2 infos " + infos);
             if (infos != null && infos.size() > 0) {
 //                performBackClick();
                 performViewClick(infos.get(infos.size() - 1));
@@ -207,6 +240,14 @@ public class HiAccessibilityService extends BaseAccessibilityService {
 
 
     private void checkEvent(){
+
+        if(!isWork){
+            isWork = true;
+            if(imageButton1 != null){
+                imageButton1.setBackgroundResource(R.drawable.green);
+            }
+        }
+
         handler.postDelayed(new Runnable() {
 
             @Override
@@ -214,15 +255,21 @@ public class HiAccessibilityService extends BaseAccessibilityService {
                 long now = System.currentTimeMillis();
                 Log.e("xxx", "checkEvent");
 
-                if(now - lastEvent > 5000){
+                if(now - lastEvent > 10000){
                     Log.e("xxx", "checkEvent delay");
                     lastEvent = now;
 //                    goAccess();
-                    performGlobalAction(GLOBAL_ACTION_RECENTS);
-                    delayMenu();
+//                    performGlobalAction(GLOBAL_ACTION_RECENTS);
+//                    delayMenu();
+
+                    if(imageButton1 != null){
+                        isWork = false;
+                        imageButton1.setBackgroundResource(R.drawable.red);
+                    }
+
                 }
             }
-        }, 10000);
+        }, 11000);
     }
 
     private void delayBackToChat(){
@@ -328,6 +375,88 @@ public class HiAccessibilityService extends BaseAccessibilityService {
             tabcount--;
         }
 
+    }
+
+    LinearLayout toucherLayout;
+    WindowManager.LayoutParams params;
+    WindowManager windowManager;
+
+    ImageButton imageButton1;
+    //状态栏高度.
+    int statusBarHeight = -1;
+
+    private void createToucher()
+    {
+        //赋值WindowManager&LayoutParam.
+        params = new WindowManager.LayoutParams();
+        windowManager = (WindowManager) getApplication().getSystemService(Context.WINDOW_SERVICE);
+        //设置type.系统提示型窗口，一般都在应用程序窗口之上.
+        params.type = WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
+        //设置效果为背景透明.
+        params.format = PixelFormat.RGBA_8888;
+        //设置flags.不可聚焦及不可使用按钮对悬浮窗进行操控.
+        params.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+
+        //设置窗口初始停靠位置.
+        params.gravity = Gravity.LEFT | Gravity.TOP;
+        params.x = 0;
+        params.y = 0;
+
+        //设置悬浮窗口长宽数据.
+        //注意，这里的width和height均使用px而非dp.这里我偷了个懒
+        //如果你想完全对应布局设置，需要先获取到机器的dpi
+        //px与dp的换算为px = dp * (dpi / 160).
+        params.width = 300;
+        params.height = 300;
+
+        LayoutInflater inflater = LayoutInflater.from(getApplication());
+        //获取浮动窗口视图所在布局.
+        toucherLayout = (LinearLayout) inflater.inflate(R.layout.toucherlayout,null);
+        //添加toucherlayout
+        windowManager.addView(toucherLayout,params);
+
+
+        //主动计算出当前View的宽高信息.
+        toucherLayout.measure(View.MeasureSpec.UNSPECIFIED,View.MeasureSpec.UNSPECIFIED);
+
+        //用于检测状态栏高度.
+        int resourceId = getResources().getIdentifier("status_bar_height","dimen","android");
+        if (resourceId > 0)
+        {
+            statusBarHeight = getResources().getDimensionPixelSize(resourceId);
+        }
+
+        //浮动窗口按钮.
+        imageButton1 = (ImageButton) toucherLayout.findViewById(R.id.imageButton1);
+
+        imageButton1.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                Log.i(TAG,"点击了");
+                goAccess();
+            }
+        });
+
+        imageButton1.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                params.x = (int) event.getRawX() - 150;
+                params.y = (int) event.getRawY() - 150 - statusBarHeight;
+                windowManager.updateViewLayout(toucherLayout,params);
+                return false;
+            }
+        });
+    }
+
+    @Override
+    public void onDestroy()
+    {
+        if (imageButton1 != null)
+        {
+            windowManager.removeView(toucherLayout);
+        }
+        super.onDestroy();
     }
 
 }
