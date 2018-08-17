@@ -67,7 +67,7 @@ public class HiAccessibilityService extends BaseAccessibilityService {
     public void onInterrupt() {
         super.onInterrupt();
 
-        Log.e("xxx", "onInterrupt ");
+        Log.e(TAG, "onInterrupt ");
         goAccess();
     }
 
@@ -77,7 +77,7 @@ public class HiAccessibilityService extends BaseAccessibilityService {
         int eventType = event.getEventType();
         String className;
 
-        Log.e("xxx", "eventType " + eventType);
+        Log.e(TAG, "eventType " + eventType);
 
         lastEvent = System.currentTimeMillis();
 
@@ -87,7 +87,7 @@ public class HiAccessibilityService extends BaseAccessibilityService {
 
             case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED:
                 className = event.getClassName().toString();
-                Log.e("xxx", "window state change " + className);
+                Log.e(TAG, "window state change " + className);
 
                 if(className.indexOf("activities.Chat") != -1){
                     isChatWindow = true;
@@ -95,6 +95,7 @@ public class HiAccessibilityService extends BaseAccessibilityService {
                     if(imageButton1 != null){
                         isWork = true;
                         imageButton1.setBackgroundResource(R.drawable.green);
+                        imageButton1.setKeepScreenOn(true);
                     }
 
                     AccessibilityNodeInfo root = getRootInActiveWindow();
@@ -113,6 +114,7 @@ public class HiAccessibilityService extends BaseAccessibilityService {
                     if(imageButton1 != null){
                         isWork = false;
                         imageButton1.setBackgroundResource(R.drawable.red);
+                        imageButton1.setKeepScreenOn(false);
                     }
 
                 }else if(className.indexOf("LuckyMoneyActivity") != -1){
@@ -121,14 +123,13 @@ public class HiAccessibilityService extends BaseAccessibilityService {
                 }
 
 //                AccessibilityNodeInfo root = getRootInActiveWindow();
-//
 //                HiAccessibilityService.printPacketInfo(root);
 
                 break;
 
             case AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED:
                 className = event.getClassName().toString();
-                Log.e("xxx", "type window content change " + isChatWindow);
+                Log.e(TAG, "type window content change " + isChatWindow);
 
                 if(isChatWindow){
 
@@ -151,7 +152,7 @@ public class HiAccessibilityService extends BaseAccessibilityService {
         AccessibilityNodeInfo listView = getNodeByClassname(root, "ListView");
 
         if(listView != null) {
-            Log.e("xxx", "scrollChatView");
+            Log.e(TAG, "scrollChatView");
             listView.performAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
         }
     }
@@ -168,20 +169,17 @@ public class HiAccessibilityService extends BaseAccessibilityService {
                 Rect rect = new Rect();
                 info.getBoundsInScreen(rect);
 
-                Log.e("xxx", "findLuckMoney top = " + rect.top);
-                Log.e("xxx", "findLuckMoney lastTop = " + lastTop);
-
                 if(rect.top <= lastTop){
                 }else{
                     performViewClick(info);
-                    Log.e("xxx", "findLuckMoney click");
+                    Log.e(TAG, "findLuckMoney click");
                 }
                 lastTop = rect.top;
 
                 return true;
 
             }else{
-//                lastTop = -2;
+
             }
         }
 
@@ -196,7 +194,7 @@ public class HiAccessibilityService extends BaseAccessibilityService {
             if (infos != null && infos.size() > 0) {
                 AccessibilityNodeInfo info = infos.get(infos.size() - 1);
                 performViewClick(infos.get(infos.size() - 1));
-                Log.e("xxx", "getLuckMoney click ");
+                Log.e(TAG, "getLuckMoney click ");
             }
         }
     }
@@ -205,18 +203,18 @@ public class HiAccessibilityService extends BaseAccessibilityService {
         AccessibilityNodeInfo root = getRootInActiveWindow();
         if(root != null) {
             List<AccessibilityNodeInfo> infos = root.findAccessibilityNodeInfosByText("查看我的红包记录");
-            Log.e("xxx", "backToChat infos " + infos);
+            Log.e(TAG, "backToChat infos " + infos);
 
             if (infos != null && infos.size() > 0) {
 
                 AccessibilityNodeInfo btn = getNodeByClassname(root, "ImageButton");
 
 //                List<AccessibilityNodeInfo> btns = root.findAccessibilityNodeInfosByText("百度红包");
-//                Log.e("xxx", "backToChat btns " + btn);
+//                Log.e(TAG, "backToChat btns " + btn);
 //
                 if(btn != null){
                     performViewClick(btn);
-                    Log.e("xxx", "backToChat click ");
+                    Log.e(TAG, "backToChat click ");
                 }
 
 //                performBackClick();
@@ -229,11 +227,20 @@ public class HiAccessibilityService extends BaseAccessibilityService {
         AccessibilityNodeInfo root = getRootInActiveWindow();
         if(root != null) {
             List<AccessibilityNodeInfo> infos = root.findAccessibilityNodeInfosByText("手慢了，红包派完了");
-//            Log.e("xxx", "backToChat2 infos " + infos);
+
             if (infos != null && infos.size() > 0) {
 //                performBackClick();
                 performViewClick(infos.get(infos.size() - 1));
-                Log.e("xxx", "backToChat2 click");
+                Log.e(TAG, "backToChat2 click");
+            }
+
+            if (infos != null && infos.size() == 0){
+                infos = root.findAccessibilityNodeInfosByText("已失效");
+                if (infos != null && infos.size() > 0) {
+//                performBackClick();
+                    performViewClick(infos.get(infos.size() - 1));
+                    Log.e(TAG, "backToChat3 click");
+                }
             }
         }
     }
@@ -245,6 +252,7 @@ public class HiAccessibilityService extends BaseAccessibilityService {
             isWork = true;
             if(imageButton1 != null){
                 imageButton1.setBackgroundResource(R.drawable.green);
+                imageButton1.setKeepScreenOn(true);
             }
         }
 
@@ -253,18 +261,19 @@ public class HiAccessibilityService extends BaseAccessibilityService {
             @Override
             public void run() {
                 long now = System.currentTimeMillis();
-                Log.e("xxx", "checkEvent");
+                Log.e(TAG, "checkEvent");
 
                 if(now - lastEvent > 10000){
-                    Log.e("xxx", "checkEvent delay");
+                    Log.e(TAG, "checkEvent delay");
                     lastEvent = now;
 //                    goAccess();
-//                    performGlobalAction(GLOBAL_ACTION_RECENTS);
-//                    delayMenu();
+                    performGlobalAction(GLOBAL_ACTION_RECENTS);
+                    delayMenu();
 
                     if(imageButton1 != null){
                         isWork = false;
                         imageButton1.setBackgroundResource(R.drawable.red);
+                        imageButton1.setKeepScreenOn(false);
                     }
 
                 }
@@ -277,7 +286,7 @@ public class HiAccessibilityService extends BaseAccessibilityService {
 
             @Override
             public void run() {
-                Log.e("xxx", "delay click");
+                Log.e(TAG, "delay click");
 
                 backToChat();
             }
@@ -289,7 +298,7 @@ public class HiAccessibilityService extends BaseAccessibilityService {
 
             @Override
             public void run() {
-                Log.e("xxx", "delay recents");
+                Log.e(TAG, "delay recents");
 
                 performGlobalAction(GLOBAL_ACTION_RECENTS);
             }
@@ -327,7 +336,7 @@ public class HiAccessibilityService extends BaseAccessibilityService {
         tabcount = 0;
         int[] is = {};
         analysisPacketInfo(root, is);
-        Log.d("xxx", sb.toString());
+        Log.d(TAG, sb.toString());
     }
 
     //打印此时的界面状况,便于分析
@@ -395,7 +404,7 @@ public class HiAccessibilityService extends BaseAccessibilityService {
         //设置效果为背景透明.
         params.format = PixelFormat.RGBA_8888;
         //设置flags.不可聚焦及不可使用按钮对悬浮窗进行操控.
-        params.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+        params.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;// |WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
 
         //设置窗口初始停靠位置.
         params.gravity = Gravity.LEFT | Gravity.TOP;
