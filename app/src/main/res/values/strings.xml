@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">HiMoney</string>
     <string name="hi">Baidu Hi 红包猎手</string>
+    <string name="service_off">关闭插件</string>
+    <string name="service_on">开启插件</string>
+    <string name="turn_on_toast">点击「HiMoney」</string>
+    <string name="turn_on_error_toast">遇到一些问题,请手动打开系统设置>无障碍服务>HiMoney(ฅ´ω`ฅ)</string>
 </resources>

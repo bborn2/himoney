@@ -1,0 +1,89 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#fff">
+
+    <ImageView
+        android:id="@+id/main_action_bar_placeholder"
+        android:layout_width="fill_parent"
+        android:layout_height="0dp"
+        android:layout_alignParentTop="true"
+        android:background="#E46C62" />
+
+    <LinearLayout
+        android:id="@+id/layout_header"
+        android:layout_width="match_parent"
+        android:layout_height="fill_parent"
+        android:layout_above="@+id/layout_control"
+        android:layout_marginBottom="12dp"
+        android:background="#E46C62"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="40dp"
+            android:gravity="center_vertical|center_horizontal"
+            android:text="@string/app_name"
+            android:textColor="#fff"
+            android:textIsSelectable="false"
+            android:textSize="28sp" />
+
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/main_bg_snow"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/layout_header"
+        android:background="@mipmap/bg_snow" />
+
+    <LinearLayout
+        android:id="@+id/layout_control"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginLeft="12dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginRight="12dp"
+        android:layout_marginBottom="8dp"
+        android:baselineAligned="false"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:id="@+id/layout_control_accessibility"
+            style="?android:attr/borderlessButtonStyle"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_weight="0.3"
+            android:background="#ffffff"
+            android:onClick="openAccessibility"
+            android:orientation="vertical"
+            android:textColor="#858585"
+            android:textSize="20sp">
+
+            <ImageView
+                android:id="@+id/layout_control_accessibility_icon"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_marginTop="6dp"
+                android:layout_marginBottom="6dp"
+                android:background="@mipmap/ic_start" />
+
+            <TextView
+                android:id="@+id/layout_control_accessibility_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:text="@string/service_on"
+                android:textColor="#dfaa6a"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+</RelativeLayout>

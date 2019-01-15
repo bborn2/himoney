@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
-    android:accessibilityEventTypes="typeWindowStateChanged|typeWindowContentChanged"
+    android:accessibilityEventTypes="typeWindowStateChanged|typeWindowContentChanged|typeNotificationStateChanged"
     android:description="@string/hi"
-    android:accessibilityFeedbackType="feedbackSpoken"
+    android:accessibilityFeedbackType="feedbackAllMask"
     android:canRetrieveWindowContent="true"
     android:packageNames="com.baidu.hi"
+    android:accessibilityFlags="flagDefault"
     android:notificationTimeout="1000"/>
